@@ -1,0 +1,126 @@
+{
+    "furniture": [
+      {
+        "id": 1,
+        "type": "шкаф",
+    "width": 90,
+    "height": 180,
+    "depth": 50,
+    "color": "#ffffff",
+    "material": "дерево",
+    "shelves": [
+      { "id": 1, "heightPercent": 25,"color" : "black" },
+      { "id": 2, "heightPercent": 50,"color" : "black" },
+      { "id": 3, "heightPercent": 75,"color" : "black" }
+    ]
+      },
+      {
+        "id": 2,
+        "type": "диван",
+        "color": "серый",
+        "size": "200x90x100",
+        "name": "Диван Комфорт",
+        "description": "Мягкий и удобный диван на 3 человека, с подлокотниками.",
+        "images": ["divan.webp"],
+        "config": {
+          "material": "ткань",
+          "color": "серый"
+        }
+      },
+      {
+        "id": 3,
+        "type": "стол",
+        "color": "коричневый",
+        "size": "140x80x75",
+        "name": "Обеденный стол",
+        "description": "Деревянный стол для кухни или столовой, рассчитан на 6 человек.",
+        "images": ["stol6.jpeg"],
+        "config": {
+          "material": "массив дуба",
+          "color": "коричневый"
+        }
+      },
+      {
+        "id": 4,
+        "type": "шкаф",
+        "color": "черный",
+        "size": "200x100x60",
+        "name": "Шкаф Люкс",
+        "description": "Стильный черный шкаф с зеркальными дверцами и LED-подсветкой.",
+        "images": ["shkaf2.jpg"],
+        "config": {
+          "shelves": 4,
+          "material": "МДФ",
+          "color": "черный"
+        }
+      },
+      {
+        "id": 5,
+        "type": "диван",
+        "color": "бежевый",
+        "size": "180x85x95",
+        "name": "Мини-диван",
+        "description": "Компактный диван для небольших помещений, раскладывается в кровать.",
+        "images": ["divan2.webp"],
+        "config": {
+          "material": "велюр",
+          "color": "бежевый"
+        }
+      },
+      {
+        "id": 6,
+        "type": "стол",
+        "color": "белый",
+        "size": "120x70x75",
+        "name": "Письменный стол",
+        "description": "Простой белый стол с выдвижным ящиком для офиса или дома.",
+        "images": ["stol1.jpg"],
+        "config": {
+          "material": "ЛДСП",
+          "color": "белый"
+        }
+      },
+      {
+        "id": 7,
+        "type": "шкаф",
+        "color": "дуб",
+        "size": "190x95x55",
+        "name": "Шкаф Дуб",
+        "description": "Теплый оттенок дуба, 2 отделения, подходит для гостиной.",
+        "images": ["shkaf3.jpg"],
+        "config": {
+          "shelves": 5,
+          "material": "дуб",
+          "color": "дуб"
+        }
+      },
+      {
+        "id": 8,
+        "type": "диван",
+        "color": "синий",
+        "size": "210x95x100",
+        "name": "Синий Диван",
+        "description": "Современный диван в ярком синем цвете, с ортопедической спинкой.",
+        "images": ["divan3.webp"],
+        "config": {
+          "material": "ткань",
+          "color": "синий"
+        }
+      },
+      {
+        "id": 9,
+        "type": "стол",
+        "color": "серый",
+        "size": "100x60x75",
+        "name": "Кофейный столик",
+        "description": "Небольшой столик для гостиной, металлические ножки.",
+        "images": ["stolik.jpg"],
+        "config": {
+          "material": "металл + стекло",
+          "color": "серый"
+        }
+      }
+    ],
+    "customFurniture": []
+  }
+  

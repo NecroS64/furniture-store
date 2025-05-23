@@ -1,0 +1,12 @@
+.furniture-preview {
+    box-sizing: border-box;
+    margin: 8px auto;
+  }
+  
+  .leg {
+    position: absolute;
+    width: 8px;
+    height: 10px;
+    background-color: #333;
+  }
+  

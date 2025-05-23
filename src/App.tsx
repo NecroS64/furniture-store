@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import CatalogPage from "./pages/CatalogPage";
+import FurniturePage from "./pages/FurniturePage"
+import FurnitureConstructor from "./pages/FurnitureConstructor";
+
+//npx json-server --watch db.json --port 3001
+//npm start
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/furniture/:id" element={<FurniturePage />} />
+        <Route path="/constructor" element={<FurnitureConstructor />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
+
