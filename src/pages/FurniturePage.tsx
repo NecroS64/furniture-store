@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Furniture } from "../types/furniture";
+import { Furniture,Colors } from "../types/furniture";
 import renderPreview  from "../components/FurniturePreview";
 
 
@@ -38,8 +38,11 @@ const FurniturePage = () => {
         </div>
         <div className="col-md-6">
           <p><strong>Тип:</strong> {furniture.type}</p>
-          {/* <p><strong>Размер:</strong> {furniture.size}</p> */}
-          <p><strong>Цвет:</strong> {furniture.color}</p>
+          {/* <p><strong>Размер:</strong> {furniture.size}</p> */
+            // users.find((user) => user.id === 2);
+          }
+          {/* <p><strong>Цвет:</strong> {furniture.color}</p> */}
+          <p><strong>Цвет:</strong> {Colors.find((color)=>color.value===furniture.color)?.name}</p>
           {/* <p><strong>Материал:</strong> {furniture.config.material}</p> */}
           <p><strong>Описание:</strong><br />{furniture.description}</p>
           <button className="btn btn-outline-primary mt-3" disabled>

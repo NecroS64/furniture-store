@@ -27,7 +27,7 @@ const renderPreview = (model:Furniture) => {
                   left: 0,
                   right: 0,
                   height: 4,
-                  backgroundColor: "rgba(0,0,0,0.5)",
+                  backgroundColor: shelf.color.toString(),
                   top: `${100 - shelf.heightPercent}%`,
                   transform: "translateY(-2px)",
                 }}

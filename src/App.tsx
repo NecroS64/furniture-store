@@ -10,6 +10,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<CatalogPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/furniture/:id" element={<FurniturePage />} />
         <Route path="/constructor" element={<FurnitureConstructor />} />

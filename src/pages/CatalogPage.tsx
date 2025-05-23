@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Furniture } from "../types/furniture";
+import { Furniture,Colors } from "../types/furniture";
 import FurnitureCard from "../components/FurnitureCard";
 import Filters from "../components/Filters";
 import { Link } from 'react-router-dom';
