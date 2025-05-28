@@ -5,7 +5,7 @@ import FurnitureCard from "../components/FurnitureCard";
 import Filters from "../components/Filters";
 import { Link } from 'react-router-dom';
 
-const Navbar = () => (
+export const Navbar = () => (
   <nav>
     <Link to="/">Главная</Link> |{' '}
     <Link to="/catalog">Каталог</Link> |{' '}
@@ -19,7 +19,8 @@ const CatalogPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/furniture")
+    // axios.get("http://localhost:3001/furniture")
+    axios.get("http://localhost:3001/api/furniture")
       .then(response => {
         setFurniture(response.data);
         setFiltered(response.data);

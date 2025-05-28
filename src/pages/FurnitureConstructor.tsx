@@ -1,9 +1,18 @@
-import React, { useState } from "react";
-import {Furniture,Shelves} from "../types/furniture"
-import renderPreview  from "../components/FurniturePreview";
+import { useLocation } from "react-router-dom";
+import React, {useEffect, useState } from "react";
+import { Furniture, Shelves, Seats } from "../types/furniture";
+import renderPreview from "../components/FurniturePreview";
+import "bootstrap/dist/css/bootstrap.min.css";
+import {Navbar} from "./CatalogPage"
+
 type FurnitureType = "шкаф" | "диван" | "стол";
-
-
+// const Navbar = () => (
+//   <nav>
+//     <Link to="/">Главная</Link> |{' '}
+//     <Link to="/catalog">Каталог</Link> |{' '}
+//     <Link to="/constructor">Конструктор мебели</Link>
+//   </nav>
+// );
 
 const defaultModels: Record<FurnitureType, Furniture> = {
   шкаф: {
@@ -14,9 +23,9 @@ const defaultModels: Record<FurnitureType, Furniture> = {
     color: "#ffffff",
     material: "дерево",
     shelves: [
-      { id: 1, heightPercent: 25,color : "black" },
-      { id: 2, heightPercent: 50,color : "black" },
-      { id: 3, heightPercent: 75,color : "black" },
+      { id: 1, heightPercent: 25, color: "black" },
+      { id: 2, heightPercent: 50, color: "black" },
+      { id: 3, heightPercent: 75, color: "black" },
     ],
   },
   диван: {
@@ -26,7 +35,11 @@ const defaultModels: Record<FurnitureType, Furniture> = {
     depth: 100,
     color: "#777777",
     material: "ткань",
-    seats: 3,
+    seats: [
+      { color: "black", id: 1 },
+      { color: "black", id: 2 },
+      { color: "black", id: 3 },
+    ],
     hasArmrests: true,
   },
   стол: {
@@ -41,58 +54,64 @@ const defaultModels: Record<FurnitureType, Furniture> = {
 };
 
 const FurnitureConstructor = () => {
-  const [model, setModel] = useState<Furniture>(defaultModels["шкаф"]);
+  const location = useLocation();
+  const initialFurniture = location.state?.furniture;
+
+  const [model, setModel] = useState<Furniture>(initialFurniture ||defaultModels["шкаф"]);
 
   const [saveStatus, setSaveStatus] = useState<null | "saving" | "success" | "error">(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  // Смена типа мебели и установка дефолтных значений
   const changeType = (type: FurnitureType) => {
     setModel(defaultModels[type]);
   };
 
-  // Универсальные обновления
-  const updateField = <K extends keyof Furniture>(
-    field: K,
-    value: Furniture[K]
-  ) => {
+  const updateField = <K extends keyof Furniture>(field: K, value: Furniture[K]) => {
     setModel((m) => ({ ...m, [field]: value }));
   };
 
-  // Для шкафа: управление полками
   const addShelf = () => {
     if (!model.shelves) return;
     const newId = model.shelves.length ? Math.max(...model.shelves.map((s) => s.id)) + 1 : 1;
-    const newShelf: Shelves = { id: newId, heightPercent: 50,color:"black" };
+    const newShelf: Shelves = { id: newId, heightPercent: 50, color: "black" };
     updateField("shelves", [...model.shelves, newShelf]);
   };
 
   const removeShelf = (id: number) => {
     if (!model.shelves) return;
-    updateField(
-      "shelves",
-      model.shelves.filter((s) => s.id !== id)
-    );
+    updateField("shelves", model.shelves.filter((s) => s.id !== id));
   };
 
   const updateShelfPosition = (id: number, heightPercent: number) => {
     if (!model.shelves) return;
-    updateField(
-      "shelves",
-      model.shelves.map((s) => (s.id === id ? { ...s, heightPercent } : s))
-    );
+    updateField("shelves", model.shelves.map((s) => (s.id === id ? { ...s, heightPercent } : s)));
   };
 
+  const saveModel = async () => {
+    setSaveStatus("saving");
+    try {
+      const response = await fetch("http://localhost:3001/customFurniture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(model),
+      });
+      if (!response.ok) throw new Error("Ошибка при сохранении");
+      setSaveStatus("success");
+    } catch (err: any) {
+      setSaveStatus("error");
+      setErrorMessage(err.message);
+    }
+  };
 
+ return (
+    <div className="container mt-4">
+      <Navbar />
+      <h2 className="mb-4">Конструктор мебели</h2>
 
-  return (
-    <div style={{ maxWidth: 800, margin: "20px auto", fontFamily: "Arial, sans-serif" }}>
-      <h2>Конструктор мебели</h2>
-
-      {/* Выбор типа мебели */}
-      <div>
-        <label>Тип мебели: </label>
+      <div className="mb-3">
+        <label className="form-label">Тип мебели:</label>
         <select
+          className="form-select"
           value={model.type}
           onChange={(e) => changeType(e.target.value as FurnitureType)}
         >
@@ -102,105 +121,112 @@ const FurnitureConstructor = () => {
         </select>
       </div>
 
-      {/* Размеры */}
-      <div style={{ marginTop: 10 }}>
-        <label>Ширина (см): </label>
-        <input
-          type="number"
-          min={10}
-          max={300}
-          value={model.width}
-          onChange={(e) => updateField("width", Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <label>Высота (см): </label>
-        <input
-          type="number"
-          min={10}
-          max={300}
-          value={model.height}
-          onChange={(e) => updateField("height", Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <label>Глубина (см): </label>
-        <input
-          type="number"
-          min={10}
-          max={200}
-          value={model.depth}
-          onChange={(e) => updateField("depth", Number(e.target.value))}
-        />
+      <div className="row">
+        {["width", "height", "depth"].map((dim) => (
+          <div className="col-md-4 mb-3" key={dim}>
+            <label className="form-label">{dim === "width" ? "Ширина" : dim === "height" ? "Высота" : "Глубина"} (см):</label>
+            <input
+              type="number"
+              className="form-control"
+              min={10}
+              max={dim === "depth" ? 200 : 300}
+              value={Number(model[dim as "width" | "height" | "depth"])}
+              onChange={(e) => updateField(dim as keyof Furniture, Number(e.target.value))}
+            />
+
+          </div>
+        ))}
       </div>
 
-      {/* Цвет */}
-      <div>
-        <label>Цвет: </label>
+      <div className="mb-3">
+        <label className="form-label">Цвет:</label>
         <input
           type="color"
+          className="form-control form-control-color"
           value={model.color}
           onChange={(e) => updateField("color", e.target.value)}
         />
       </div>
 
-      {/* Материал */}
-      <div>
-        <label>Материал: </label>
+      <div className="mb-3">
+        <label className="form-label">Материал:</label>
         <input
           type="text"
+          className="form-control"
           value={model.material}
           onChange={(e) => updateField("material", e.target.value)}
         />
       </div>
 
-      {/* Дополнительные параметры по типу */}
-
       {model.type === "шкаф" && (
-        <div style={{ marginTop: 20 }}>
-          <h3>Полки</h3>
+        <div className="mb-4">
+          <h4>Полки</h4>
           {model.shelves?.map((shelf) => (
-            <div key={shelf.id} style={{ marginBottom: 10 }}>
-              <label>Положение полки (% от низа): </label>
+            <div className="input-group mb-2" key={shelf.id}>
+              <span className="input-group-text">Положение (%):</span>
               <input
                 type="number"
+                className="form-control"
                 min={0}
                 max={100}
                 value={shelf.heightPercent}
-                onChange={(e) =>
-                  updateShelfPosition(shelf.id, Number(e.target.value))
-                }
-                style={{ width: 60 }}
+                onChange={(e) => updateShelfPosition(shelf.id, Number(e.target.value))}
               />
-              <button onClick={() => removeShelf(shelf.id)} style={{ marginLeft: 10 }}>
-                Удалить
-              </button>
+              <button className="btn btn-outline-danger" onClick={() => removeShelf(shelf.id)}>Удалить</button>
             </div>
           ))}
-          <button onClick={addShelf}>Добавить полку</button>
+          <button className="btn btn-outline-primary" onClick={addShelf}>Добавить полку</button>
         </div>
       )}
 
       {model.type === "диван" && (
-        <div style={{ marginTop: 20 }}>
-          <h3>Настройки дивана</h3>
-          <div>
-            <label>Количество сидячих мест: </label>
+        <div className="mb-4">
+          <h4>Настройки дивана</h4>
+
+          <div className="mb-2">
+            <label className="form-label">Количество сидений:</label>
             <input
               type="number"
+              className="form-control"
               min={1}
               max={6}
-              value={model.seats || 1}
-              onChange={(e) => updateField("seats", Number(e.target.value))}
+              value={model.seats?.length || 1}
+              onChange={(e) => {
+                const count = Number(e.target.value);
+                const newSeats = Array.from({ length: count }, (_, i) => ({
+                  id: i + 1,
+                  color: model.seats?.[0]?.color || "black",
+                }));
+                updateField("seats", newSeats);
+              }}
             />
           </div>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={model.hasArmrests || false}
-                onChange={(e) => updateField("hasArmrests", e.target.checked)}
-              />{" "}
+
+          <div className="mb-2">
+            <label className="form-label">Цвет сидений:</label>
+            <input
+              type="color"
+              className="form-control form-control-color"
+              value={model.seats?.[0]?.color || "#000000"}
+              onChange={(e) => {
+                const color = e.target.value;
+                updateField(
+                  "seats",
+                  model.seats?.map((seat) => ({ ...seat, color })) || []
+                );
+              }}
+            />
+          </div>
+
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              checked={model.hasArmrests || false}
+              onChange={(e) => updateField("hasArmrests", e.target.checked)}
+              id="armrestsCheck"
+            />
+            <label className="form-check-label" htmlFor="armrestsCheck">
               Подлокотники
             </label>
           </div>
@@ -208,27 +234,36 @@ const FurnitureConstructor = () => {
       )}
 
       {model.type === "стол" && (
-        <div style={{ marginTop: 20 }}>
-          <h3>Настройки стола</h3>
-          <div>
-            <label>Материал ножек: </label>
-            <select
-              value={model.legsMaterial || ""}
-              onChange={(e) => updateField("legsMaterial", e.target.value)}
-            >
-              <option value="">-- Выберите материал --</option>
-              <option value="металл">Металл</option>
-              <option value="дерево">Дерево</option>
-              <option value="пластик">Пластик</option>
-            </select>
-          </div>
+        <div className="mb-4">
+          <h4>Настройки стола</h4>
+          <label className="form-label">Материал ножек:</label>
+          <select
+            className="form-select"
+            value={model.legsMaterial || ""}
+            onChange={(e) => updateField("legsMaterial", e.target.value)}
+          >
+            <option value="">-- Выберите материал --</option>
+            <option value="металл">Металл</option>
+            <option value="дерево">Дерево</option>
+            <option value="пластик">Пластик</option>
+          </select>
         </div>
       )}
 
-      {/* Визуальный предпросмотр */}
-      <div style={{ marginTop: 30, textAlign: "center" }}>
-        <h3>Предпросмотр</h3>
+      <div className="text-center my-4">
+        <h4>Предпросмотр</h4>
         {renderPreview(model)}
+      </div>
+
+      <div className="text-center mb-5">
+        <button className="btn btn-success px-4 py-2" onClick={saveModel}>
+          Сохранить модель
+        </button>
+        <div className="mt-3">
+          {saveStatus === "saving" && <span className="text-muted">Сохраняем...</span>}
+          {saveStatus === "success" && <span className="text-success">Успешно сохранено!</span>}
+          {saveStatus === "error" && <span className="text-danger">Ошибка: {errorMessage}</span>}
+        </div>
       </div>
     </div>
   );

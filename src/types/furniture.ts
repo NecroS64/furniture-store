@@ -1,7 +1,14 @@
 export interface Shelves{
-    color:String;
+    color:string;
     id: number;
     heightPercent: number;
+}
+
+
+
+export interface Seats{
+    color:string;
+    id: number;
 }
 
 export const Colors = [
@@ -28,7 +35,7 @@ export interface Furniture {
     images?: string[];
     
     shelves?: Shelves[];
-    seats?: number;    // Только для дивана
+    seats?: Seats[];    // Только для дивана
     hasArmrests?: boolean; // Только для дивана
     legsMaterial?: string; // Только для стола
     material: string;

@@ -85,14 +85,15 @@ const renderPreview = (model:Furniture) => {
                 boxSizing: "border-box",
               }}
             >
-              {Array.from({ length: model.seats || 1 }).map((_, i) => (
+              {model.seats?.map((seat, i) => (
                 <div
-                  key={i}
+                  key={seat.id}
                   style={{
-                    backgroundColor: "#ccc",
+                    backgroundColor: seat.color || "#000000", // ← здесь
                     flex: 1,
                     margin: "0 5px",
                     borderRadius: 8,
+                    height: "100%", // можно задать фиксированную высоту
                   }}
                 />
               ))}
