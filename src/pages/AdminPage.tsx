@@ -23,7 +23,7 @@ const AdminPage = () => {
     const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     // axios.get("http://localhost:3001/furniture")
-    axios.get("http://localhost:3001/api/admin/furniture",{
+    axios.get("http://localhost:3001/api/admin",{
         withCredentials: true,
     })
       .then(response => {
@@ -59,7 +59,7 @@ const AdminPage = () => {
   if (depth !== undefined) params.append("depth", depth.toString());
 
   axios
-    .get(`http://localhost:3001/api/furniture/filter?${params.toString()}`)
+    .get(`http://localhost:3001/api/admin/filter?${params.toString()}`)
     .then((response) => {
       setFiltered(response.data);
     })
