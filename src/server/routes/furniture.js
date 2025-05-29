@@ -36,6 +36,64 @@ router.get("/", async (req, res) => {
 });
 
 // Фильтрация мебели
+/**
+ * @swagger
+ * /api/furniture/filter:
+ *   get:
+ *     summary: Получить список стандартной мебели по фильтрам
+ *     tags:
+ *       - Furniture
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Тип мебели
+ *         example: chair
+ *       - in: query
+ *         name: color
+ *         schema:
+ *           type: string
+ *         description: Цвет мебели
+ *         example: red
+ *       - in: query
+ *         name: width
+ *         schema:
+ *           type: integer
+ *         description: Ширина мебели
+ *         example: 50
+ *       - in: query
+ *         name: height
+ *         schema:
+ *           type: integer
+ *         description: Высота мебели
+ *         example: 120
+ *       - in: query
+ *         name: depth
+ *         schema:
+ *           type: integer
+ *         description: Глубина мебели
+ *         example: 40
+ *     responses:
+ *       200:
+ *         description: Список мебели, соответствующий фильтрам
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Furniture'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Server error
+ */
 router.get("/filter", async (req, res) => {
   const { type, color, width, height, depth } = req.query;
 
@@ -77,6 +135,29 @@ router.get("/filter", async (req, res) => {
 });
 
 // Получение всей пользовательской мебели
+/**
+ * @swagger
+ * /api/furniture/custom:
+ *   get:
+ *     summary: Получить список собственной кастомной мебели пользователя
+ *     tags:
+ *       - Furniture
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список кастомной мебели
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Furniture'
+ *       401:
+ *         description: Пользователь не авторизован
+ *       500:
+ *         description: Ошибка сервера
+ */
 router.get("/custom",authenticateToken, async (req, res) => {
   try {
     const userId = req.user?.userId;
@@ -91,6 +172,44 @@ router.get("/custom",authenticateToken, async (req, res) => {
 
 
 // Получение одного предмета по ID
+/**
+ * @swagger
+ * /api/furniture/{id}:
+ *   get:
+ *     summary: Получить мебель по ID (включая полки или сиденья при наличии)
+ *     tags:
+ *       - Furniture
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Идентификатор мебели
+ *         example: 42
+ *     responses:
+ *       200:
+ *         description: Мебель с дополнительными данными (полки или сиденья)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/Furniture'
+ *                 - type: object
+ *                   properties:
+ *                     shelves:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Shelf'
+ *                     seats:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Seat'
+ *       404:
+ *         description: Мебель не найдена
+ *       500:
+ *         description: Ошибка сервера
+ */
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 

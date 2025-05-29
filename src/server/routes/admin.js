@@ -84,7 +84,7 @@ router.get("/", authenticateToken, async (req, res) => {
  *       500:
  *         description: Внутренняя ошибка сервера
  */
-router.get("/filter", async (req, res) => {
+router.get("/filter", authenticateToken, async (req, res) => {
   const { type, color, width, height, depth } = req.query;
 
   let query = "SELECT furniture.*, admin_users.username FROM furniture LEFT JOIN admin_users ON furniture.user_id = admin_users.id WHERE furniture.isCustom = true";
@@ -124,6 +124,53 @@ router.get("/filter", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/admin/delete/{id}:
+ *   delete:
+ *     summary: Удалить мебель по ID (только для админов)
+ *     tags:
+ *       - Admin
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID мебели для удаления
+ *     security:
+ *       - bearerAuth: []   # Если используете JWT через Bearer
+ *     responses:
+ *       200:
+ *         description: Успешное удаление
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Удалено
+ *       403:
+ *         description: Доступ запрещен (только админы)
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.delete("/delete/:id", authenticateToken, async (req, res) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ error: "Access denied: Admins only" });
+  }
+
+  const id = req.params.id;
+
+  try {
+    await pool.query("DELETE FROM furniture WHERE id = ?", [id]);
+    res.json({ message: "Удалено" });
+  } catch (err) {
+    console.error("Ошибка при удалении:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 router.delete("/delete/:id", authenticateToken, async (req, res) => {
   if (!req.user || !req.user.isAdmin) {

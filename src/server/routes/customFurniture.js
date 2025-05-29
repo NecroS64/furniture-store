@@ -3,7 +3,105 @@ const router = express.Router();
 const pool = require("../db");
 
 const authenticateToken = require("../middleware/authMiddleware");
-
+/**
+ * @swagger
+ * /api/customFurniture:
+ *   post:
+ *     summary: Сохранить или обновить пользовательскую мебель
+ *     tags:
+ *       - CustomFurniture
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: ID мебели (для обновления, опционально)
+ *               type:
+ *                 type: string
+ *                 description: Тип мебели
+ *                 example: chair
+ *               name:
+ *                 type: string
+ *                 description: Название мебели
+ *                 example: Стул
+ *               width:
+ *                 type: integer
+ *                 example: 50
+ *               height:
+ *                 type: integer
+ *                 example: 100
+ *               depth:
+ *                 type: integer
+ *                 example: 45
+ *               color:
+ *                 type: string
+ *                 example: red
+ *               description:
+ *                 type: string
+ *                 example: Удобный стул для кухни
+ *               material:
+ *                 type: string
+ *                 example: дерево
+ *               shelves:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     heightPercent:
+ *                       type: integer
+ *                       example: 30
+ *                     color:
+ *                       type: string
+ *                       example: white
+ *               seats:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     color:
+ *                       type: string
+ *                       example: black
+ *     responses:
+ *       200:
+ *         description: Модель мебели успешно сохранена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Model saved successfully
+ *                 id:
+ *                   type: integer
+ *                   example: 123
+ *       401:
+ *         description: Неавторизованный пользователь
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to save model
+ */
 router.post("/", authenticateToken, async (req, res) => {
   const model = req.body;
   const userId = req.user?.userId;
