@@ -22,7 +22,6 @@ export const Colors = [
   { name: "Синий", value: "#0000FF" },
   { name: "Зеленый", value: "#008000" },
 ];
-
 export interface Furniture {
     id?: number;
     type?: string;
@@ -33,7 +32,7 @@ export interface Furniture {
     name?: string;
     description?: string;
     images?: string[];
-    
+     username?: string;
     shelves?: Shelves[];
     seats?: Seats[];    // Только для дивана
     hasArmrests?: boolean; // Только для дивана

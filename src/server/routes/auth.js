@@ -6,10 +6,50 @@ const pool = require("../db");
 const router = express.Router();
 
 
-// routes/auth.js
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Выход пользователя
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Успешный выход, токен удалён
+ *       500:
+ *         description: Внутренняя ошибка сервера
+ */
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", { path: "/" });
+  res.status(200).json({ message: "Logged out" });
+});
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Вход пользователя
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Успешный вход
+ *       401:
+ *         description: Неверный логин или пароль
+ */
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const [[user]] = await pool.query("SELECT * FROM admin_users WHERE username = ?", [username]);
@@ -26,11 +66,11 @@ router.post("/login", async (req, res) => {
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
-  // ⬅️ УСТАНАВЛИВАЕМ cookie
+ 
   res
     .cookie("token", token, {
       httpOnly: true,
-      secure: false, // ⬅️ должно быть true, если используется HTTPS
+      secure: false, 
       sameSite: "Lax",
     })
     .json({ isAdmin: payload.isAdmin });

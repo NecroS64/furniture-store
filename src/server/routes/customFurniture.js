@@ -2,8 +2,15 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-router.post("/", async (req, res) => {
+const authenticateToken = require("../middleware/authMiddleware");
+
+router.post("/", authenticateToken, async (req, res) => {
   const model = req.body;
+  const userId = req.user?.userId;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   const conn = await pool.getConnection();
   await conn.beginTransaction();
@@ -23,23 +30,33 @@ router.post("/", async (req, res) => {
       seats = [],
     } = model;
 
-    // Сохраняем или обновляем мебель
     const [result] = await conn.query(
-  `INSERT INTO furniture ( type, name, width, height, depth, color, description, material, isCustom)
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-   ON DUPLICATE KEY UPDATE
-     type=VALUES(type),
-     name=VALUES(name),
-     width=VALUES(width),
-     height=VALUES(height),
-     depth=VALUES(depth),
-     color=VALUES(color),
-     description=VALUES(description),
-     material=VALUES(material),
-     isCustom=VALUES(isCustom)`,
-  [ type, name, width, height, depth, color, description, material, true] // true для кастомной мебели
-);
-
+      `INSERT INTO furniture (type, name, width, height, depth, color, description, material, isCustom, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         type=VALUES(type),
+         name=VALUES(name),
+         width=VALUES(width),
+         height=VALUES(height),
+         depth=VALUES(depth),
+         color=VALUES(color),
+         description=VALUES(description),
+         material=VALUES(material),
+         isCustom=VALUES(isCustom),
+         user_id=VALUES(user_id)`,
+      [
+        type,
+        name,
+        width,
+        height,
+        depth,
+        color,
+        description,
+        material,
+        true,        // isCustom = true
+        userId       // id_user
+      ]
+    );
 
     const furnitureId = id || result.insertId;
 

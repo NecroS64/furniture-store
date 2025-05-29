@@ -5,7 +5,7 @@ function authenticateToken(req, res, next) {
   const cookieToken = req.cookies?.token;
   const token = (authHeader && authHeader.split(" ")[1]) || cookieToken;
 
-  console.log("Authorization header:", authHeader);
+  //console.log("Authorization header:", authHeader);
   console.log("Token:", token);
 
   if (!token) return res.status(401).json({ error: "Token missing" });

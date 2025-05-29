@@ -1,8 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
-
+const authenticateToken = require("../middleware/authMiddleware");
 // Получение всех предметов мебели
+/**
+ * @swagger
+ * /api/admin:
+ *   get:
+ *     summary: Получить список пользовательской мебели (только для админов)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Успешно. Возвращает список мебели.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Furniture'
+ *       403:
+ *         description: Доступ запрещен. Только для администраторов.
+ *       500:
+ *         description: Внутренняя ошибка сервера
+ */
 router.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom=false");
@@ -55,9 +77,11 @@ router.get("/filter", async (req, res) => {
 });
 
 // Получение всей пользовательской мебели
-router.get("/custom", async (req, res) => {
+router.get("/custom",authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom = true");
+    const userId = req.user?.userId;
+    console.log("UserId:", userId);
+    const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom = true AND user_id = ?",[userId]);
     res.json(rows);
   } catch (err) {
     console.error(err);

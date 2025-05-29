@@ -10,7 +10,9 @@ const CustomFurniturePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/api/furniture/custom")
+    axios.get("http://localhost:3001/api/furniture/custom",{
+       withCredentials: true,
+    })
       .then(res => {
         setFurniture(res.data);
         setLoading(false);

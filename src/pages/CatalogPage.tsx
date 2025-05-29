@@ -3,17 +3,42 @@ import axios from "axios";
 import { Furniture,Colors } from "../types/furniture";
 import FurnitureCard from "../components/FurnitureCard";
 import Filters from "../components/Filters";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+export const Logout = () => {
+  const navigate = useNavigate();
+
+  
+    const handleLogout = async () => {
+  try {
+    await fetch("http://localhost:3001/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (err) {
+    console.error("Ошибка при выходе:", err);
+  }
+    navigate("/");
+  };
+
+  return (
+    <nav>
+      <button onClick={handleLogout} className="btn btn-link p-0">Выход</button>
+    </nav>
+  );
+};
 
 export const Navbar = () => (
   <nav>
     <Link to="/">Главная</Link> |{' '}
     <Link to="/catalog">Каталог</Link> |{' '}
     <Link to="/constructor">Конструктор мебели</Link> |{' '}
-    <Link to="/custom">Моя мебель</Link>
-
+    <Link to="/custom">Моя мебель</Link>|{' '}
+    <Logout/>
   </nav>
 );
+
+
 const CatalogPage = () => {
   const [furniture, setFurniture] = useState<Furniture[]>([]);
   const [filtered, setFiltered] = useState<Furniture[]>([]);

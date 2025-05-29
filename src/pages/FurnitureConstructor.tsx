@@ -90,7 +90,8 @@ const FurnitureConstructor = () => {
   const saveModel = async () => {
     setSaveStatus("saving");
     try {
-      const response = await fetch("http://localhost:3001/customFurniture", {
+      const response = await fetch("http://localhost:3001/api/customFurniture", {
+        credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(model),
