@@ -14,7 +14,8 @@ const FurniturePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:3001/furniture/${id}`)
+    // axios.get(`http://localhost:3001/furniture/${id}`)
+      axios.get(`http://localhost:3001/api/furniture/${id}`)
       .then(res => {
         setFurniture(res.data);
         setLoading(false);
@@ -52,7 +53,7 @@ const FurniturePage = () => {
             // users.find((user) => user.id === 2);
           }
           {/* <p><strong>Цвет:</strong> {furniture.color}</p> */}
-          <p><strong>Цвет:</strong> {Colors.find((color)=>color.value===furniture.color)?.name}</p>
+          <p><strong>Цвет:</strong> {Colors.find(color => color.value === furniture.color)?.name || "Пользовательский"}</p>
           {/* <p><strong>Материал:</strong> {furniture.config.material}</p> */}
           <p><strong>Описание:</strong><br />{furniture.description}</p>
           <button onClick={goToConstructor} className="btn btn-outline-primary mt-3" >

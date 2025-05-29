@@ -17,7 +17,7 @@ export const Colors = [
   { name: "Чёрный", value: "#333232" },
   { name: "Коричневый", value: "#8b4513" },
   { name: "Красный", value: "#FF0000" },
-  { name: "Желтый", value: "#FF0000" },
+  { name: "Желтый", value: "#FFFF00" },
   { name: "Фиолетовый", value: "#800080" },
   { name: "Синий", value: "#0000FF" },
   { name: "Зеленый", value: "#008000" },

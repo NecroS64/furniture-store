@@ -15,7 +15,7 @@ const FurnitureCard = ({ furniture }: { furniture: Furniture }) => {
         <h5 className="card-title">{furniture.name}</h5>
         <p className="card-text mb-1"><strong>Тип:</strong> {furniture.type}</p>
         {/* <p className="card-text mb-1"><strong>Размер:</strong> {furniture.width.toString()+" "+furniture.height.toString()+" "+furniture.depth.toString()}</p> */}
-        <p><strong>Цвет:</strong> {Colors.find((color)=>color.value===furniture.color)?.name}</p>
+        <p><strong>Цвет:</strong> {Colors.find(color => color.value === furniture.color)?.name || "Пользовательский"}</p>
         <p className="card-text text-truncate" title={furniture.description}>
           {furniture.description}
         </p>
