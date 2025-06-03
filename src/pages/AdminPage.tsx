@@ -15,6 +15,9 @@ export const Navbar = () => {
         method: "POST",
         credentials: "include",
       });
+      localStorage.removeItem("accessToken");
+      navigate("/");
+
     } catch (err) {
       console.error("Ошибка при выходе:", err);
     }
@@ -35,48 +38,95 @@ const AdminPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/api/admin", { withCredentials: true })
-      .then(response => {
-        setFurniture(response.data);
-        setFiltered(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        const message = error.response?.data?.error || error.message || "Не удалось загрузить данные";
-        setError(message);
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      let token = localStorage.getItem("accessToken");
+
+      const response = await axios.get("http://localhost:3001/api/admin", {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
-  }, []);
 
-  const handleFilter = (
-    type: string,
-    color: string,
-    width?: number,
-    height?: number,
-    depth?: number
-  ) => {
+      setFurniture(response.data);
+      setFiltered(response.data);
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        try {
+          const refreshResponse = await axios.post(
+            "http://localhost:3001/api/auth/refresh",
+            {},
+            { withCredentials: true }
+          );
+
+          const newAccessToken = refreshResponse.data.accessToken;
+          localStorage.setItem("accessToken", newAccessToken);
+
+          const retryResponse = await axios.get("http://localhost:3001/api/admin", {
+            headers: { Authorization: `Bearer ${newAccessToken}` },
+            withCredentials: true,
+          });
+
+          setFurniture(retryResponse.data);
+          setFiltered(retryResponse.data);
+        } catch (refreshError) {
+          setError("Авторизация истекла. Пожалуйста, войдите снова.");
+        }
+      } else {
+        setError("Не удалось загрузить данные");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
+  const handleFilter = async (
+  type: string,
+  color: string,
+  width?: number,
+  height?: number,
+  depth?: number
+) => {
+  try {
     const params = new URLSearchParams();
-
     if (type) params.append("type", type);
     if (color) params.append("color", color);
     if (width !== undefined) params.append("width", width.toString());
     if (height !== undefined) params.append("height", height.toString());
     if (depth !== undefined) params.append("depth", depth.toString());
 
-    axios.get(`http://localhost:3001/api/admin/filter?${params.toString()}`, { withCredentials: true })
-      .then(response => setFiltered(response.data))
-      .catch(() => setError("Не удалось применить фильтр"));
-  };
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(`http://localhost:3001/api/admin/filter?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
+    setFiltered(response.data);
+  } catch {
+    setError("Не удалось применить фильтр");
+  }
+};
+
 
   const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`http://localhost:3001/api/admin/delete/${id}`, { withCredentials: true });
-      setFurniture(prev => prev.filter(f => f.id !== id));
-      setFiltered(prev => prev.filter(f => f.id !== id));
-    } catch {
-      setError("Не удалось удалить мебель");
-    }
-  };
+  try {
+    const token = localStorage.getItem("accessToken");
+
+    await axios.delete(`http://localhost:3001/api/admin/delete/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
+    setFurniture(prev => prev.filter(f => f.id !== id));
+    setFiltered(prev => prev.filter(f => f.id !== id));
+  } catch {
+    setError("Не удалось удалить мебель");
+  }
+};
+
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>{error}</div>;

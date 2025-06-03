@@ -104,7 +104,7 @@ const authenticateToken = require("../middleware/authMiddleware");
  */
 router.post("/", authenticateToken, async (req, res) => {
   const model = req.body;
-  const userId = req.user?.userId;
+  const userId = req.user?.id;
 
   if (!userId) {
     return res.status(401).json({ error: "Unauthorized" });

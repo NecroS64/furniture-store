@@ -9,10 +9,20 @@ const CustomFurniturePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
+      // let token = localStorage.getItem("accessToken");
+
+      // const response = await axios.get("http://localhost:3001/api/admin", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      //   withCredentials: true,
+      // });
+
   useEffect(() => {
+    let token = localStorage.getItem("accessToken");
     axios.get("http://localhost:3001/api/furniture/custom",{
-       withCredentials: true,
-    })
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      })
       .then(res => {
         setFurniture(res.data);
         setLoading(false);

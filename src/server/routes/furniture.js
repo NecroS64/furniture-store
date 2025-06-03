@@ -160,7 +160,7 @@ router.get("/filter", async (req, res) => {
  */
 router.get("/custom",authenticateToken, async (req, res) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
     console.log("UserId:", userId);
     const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom = true AND user_id = ?",[userId]);
     res.json(rows);

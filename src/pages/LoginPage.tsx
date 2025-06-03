@@ -11,7 +11,7 @@ const login = async () => {
   try {
     const response = await fetch("http://localhost:3001/api/auth/login", {
       method: "POST",
-      credentials: "include",
+      credentials: "include", // для передачи refreshToken из cookie
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
@@ -19,7 +19,10 @@ const login = async () => {
     if (!response.ok) throw new Error("Ошибка входа");
 
     const data = await response.json();
-    
+
+    // Сохраняем accessToken в localStorage
+    localStorage.setItem("accessToken", data.accessToken);
+
     if (data.isAdmin) {
       navigate("/admin");
     } else {
@@ -29,6 +32,7 @@ const login = async () => {
     setError("Неверный логин или пароль");
   }
 };
+
 
 
   return (

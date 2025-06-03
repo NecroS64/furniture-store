@@ -87,22 +87,60 @@ const FurnitureConstructor = () => {
     updateField("shelves", model.shelves.map((s) => (s.id === id ? { ...s, heightPercent } : s)));
   };
 
-  const saveModel = async () => {
-    setSaveStatus("saving");
+
+  
+const saveModel = async () => {
+  setSaveStatus("saving");
+
+  const sendRequest = async (token: string | null) => {
+    const response = await fetch("http://localhost:3001/api/customFurniture", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(model),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) throw new Error("unauthorized");
+      else throw new Error("Ошибка при сохранении");
+    }
+
+    return response;
+  };
+
+  try {
+    let token = localStorage.getItem("accessToken");
     try {
-      const response = await fetch("http://localhost:3001/api/customFurniture", {
-        credentials: "include",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(model),
-      });
-      if (!response.ok) throw new Error("Ошибка при сохранении");
+      await sendRequest(token);
       setSaveStatus("success");
     } catch (err: any) {
-      setSaveStatus("error");
-      setErrorMessage(err.message);
+      if (err.message === "unauthorized") {
+        // Попробовать обновить токен
+        const refreshResp = await fetch("http://localhost:3001/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!refreshResp.ok) throw new Error("Не удалось обновить токен");
+
+        const data = await refreshResp.json();
+        localStorage.setItem("accessToken", data.accessToken);
+
+        // Повторить запрос
+        await sendRequest(data.accessToken);
+        setSaveStatus("success");
+      } else {
+        throw err;
+      }
     }
-  };
+  } catch (err: any) {
+    setSaveStatus("error");
+    setErrorMessage(err.message);
+  }
+};
+
 
  return (
     <div className="container mt-4">
