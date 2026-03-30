@@ -28,13 +28,12 @@ const authenticateToken = require("../middleware/authMiddleware");
 router.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom=false");
-    res.json(rows);
+    res.status(200).json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });
-
 // Фильтрация мебели
 /**
  * @swagger
@@ -127,7 +126,7 @@ router.get("/filter", async (req, res) => {
 
   try {
     const [rows] = await pool.query(query, params);
-    res.json(rows);
+    res.status(200).json(rows);
   } catch (err) {
     console.error("Ошибка при фильтрации:", err);
     res.status(500).json({ error: "Server error" });
@@ -163,7 +162,7 @@ router.get("/custom",authenticateToken, async (req, res) => {
     const userId = req.user?.id;
     console.log("UserId:", userId);
     const [rows] = await pool.query("SELECT * FROM furniture WHERE isCustom = true AND user_id = ?",[userId]);
-    res.json(rows);
+    res.status(200).json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -231,7 +230,7 @@ router.get("/:id", async (req, res) => {
       furniture.seats = seats;
     }
 
-    res.json(furniture);
+    res.status(200).json(furniture);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

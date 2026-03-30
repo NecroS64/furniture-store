@@ -22,6 +22,7 @@ router.post("/logout", async (req, res) => {
   }
 
   res.clearCookie("refreshToken", { path: "/" });
+  res.clearCookie("accessToken", { path: "/" });
   res.status(200).json({ message: "Logged out" });
 });
 
@@ -52,12 +53,18 @@ router.post("/login", async (req, res) => {
     refreshToken,
   ]);
 
-  res
+  res.status(200)
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "strict",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
+  })
+  .cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "strict",
+    path: "/",
+    maxAge: 1 * 60 * 60 * 1000,
   })
   .json({ accessToken, refreshToken, isAdmin: user.isAdmin });
 
@@ -104,6 +111,12 @@ router.post("/refresh", async (req, res) => {
         sameSite: "strict",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 1 * 60 * 60 * 1000,
       });
 
       res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken, isAdmin: payload.isAdmin });

@@ -31,6 +31,17 @@ export const Navbar = () => {
   );
 };
 
+
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(';').shift();
+    return cookieValue ?? null;
+  }
+  return null;
+}
+
 const AdminPage = () => {
   const [furniture, setFurniture] = useState<Furniture[]>([]);
   const [filtered, setFiltered] = useState<Furniture[]>([]);
@@ -40,40 +51,44 @@ const AdminPage = () => {
   useEffect(() => {
   const fetchData = async () => {
     try {
-      let token = localStorage.getItem("accessToken");
+  let token = getCookie("accessToken");
+  if (!token) {
+    // Нет токена — выбрасываем ошибку, которая будет обработана как требующая обновления
+    throw new Error("No access token");
+  }
+  const response = await axios.get("http://localhost:3001/api/admin", {
+    headers: { Authorization: `Bearer ${token}` },
+    withCredentials: true,
+  });
+  setFurniture(response.data);
+  setFiltered(response.data);
+} catch (error: any) {
+  // Обрабатываем как 401, так и отсутствие токена
+  if (error.response?.status === 401 || error.message === "No access token") {
+    try {
+      const refreshResponse = await axios.post(
+        "http://localhost:3001/api/auth/refresh",
+        {},
+        { withCredentials: true }
+      );
 
-      const response = await axios.get("http://localhost:3001/api/admin", {
-        headers: { Authorization: `Bearer ${token}` },
+      const newAccessToken = refreshResponse.data.accessToken;
+      // Сохраняем новый токен в куку (а не в localStorage)
+      document.cookie = `accessToken=${newAccessToken}; path=/; Secure; SameSite=Strict`;
+
+      // Повторяем исходный запрос с новым токеном
+      const retryResponse = await axios.get("http://localhost:3001/api/admin", {
+        headers: { Authorization: `Bearer ${newAccessToken}` },
         withCredentials: true,
       });
-
-      setFurniture(response.data);
-      setFiltered(response.data);
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        try {
-          const refreshResponse = await axios.post(
-            "http://localhost:3001/api/auth/refresh",
-            {},
-            { withCredentials: true }
-          );
-
-          const newAccessToken = refreshResponse.data.accessToken;
-          localStorage.setItem("accessToken", newAccessToken);
-
-          const retryResponse = await axios.get("http://localhost:3001/api/admin", {
-            headers: { Authorization: `Bearer ${newAccessToken}` },
-            withCredentials: true,
-          });
-
-          setFurniture(retryResponse.data);
-          setFiltered(retryResponse.data);
-        } catch (refreshError) {
-          setError("Авторизация истекла. Пожалуйста, войдите снова.");
-        }
-      } else {
-        setError("Не удалось загрузить данные");
-      }
+      setFurniture(retryResponse.data);
+      setFiltered(retryResponse.data);
+    } catch (refreshError) {
+      setError("Авторизация истекла. Пожалуйста, войдите снова.");
+    }
+  } else {
+    setError("Не удалось загрузить данные");
+  }
     } finally {
       setLoading(false);
     }
@@ -98,7 +113,8 @@ const AdminPage = () => {
     if (height !== undefined) params.append("height", height.toString());
     if (depth !== undefined) params.append("depth", depth.toString());
 
-    const token = localStorage.getItem("accessToken");
+    // let token = localStorage.getItem("accessToken");
+     let token = getCookie("accessToken");
     const response = await axios.get(`http://localhost:3001/api/admin/filter?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
       withCredentials: true,
@@ -113,7 +129,8 @@ const AdminPage = () => {
 
   const handleDelete = async (id: number) => {
   try {
-    const token = localStorage.getItem("accessToken");
+    // let token = localStorage.getItem("accessToken");
+     let token = getCookie("accessToken");
 
     await axios.delete(`http://localhost:3001/api/admin/delete/${id}`, {
       headers: { Authorization: `Bearer ${token}` },

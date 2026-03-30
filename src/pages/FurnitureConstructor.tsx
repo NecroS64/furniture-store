@@ -87,7 +87,15 @@ const FurnitureConstructor = () => {
     updateField("shelves", model.shelves.map((s) => (s.id === id ? { ...s, heightPercent } : s)));
   };
 
-
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(';').shift();
+    return cookieValue ?? null;
+  }
+  return null;
+}
   
 const saveModel = async () => {
   setSaveStatus("saving");
@@ -112,34 +120,40 @@ const saveModel = async () => {
   };
 
   try {
-    let token = localStorage.getItem("accessToken");
-    try {
-      await sendRequest(token);
-      setSaveStatus("success");
-    } catch (err: any) {
-      if (err.message === "unauthorized") {
-        // Попробовать обновить токен
-        const refreshResp = await fetch("http://localhost:3001/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-        if (!refreshResp.ok) throw new Error("Не удалось обновить токен");
-
-        const data = await refreshResp.json();
-        localStorage.setItem("accessToken", data.accessToken);
-
-        // Повторить запрос
-        await sendRequest(data.accessToken);
-        setSaveStatus("success");
-      } else {
-        throw err;
-      }
+  // Внешний try только для финальной обработки ошибок
+  try {
+    let token = getCookie("accessToken");
+    if (!token) {
+      // Теперь эта ошибка попадает во внутренний catch
+      throw new Error("unauthorized");
     }
+    await sendRequest(token);
+    setSaveStatus("success");
   } catch (err: any) {
-    setSaveStatus("error");
-    setErrorMessage(err.message);
+    if (err.message === "unauthorized") {
+      // Попробовать обновить токен
+      const refreshResp = await fetch("http://localhost:3001/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!refreshResp.ok) throw new Error("Не удалось обновить токен");
+
+      const data = await refreshResp.json();
+      // Сохраняем новый access token в куку
+      document.cookie = `accessToken=${data.accessToken}; path=/; Secure; SameSite=Strict`;
+
+      // Повторить запрос с новым токеном
+      await sendRequest(data.accessToken);
+      setSaveStatus("success");
+    } else {
+      throw err; // Пробрасываем другие ошибки во внешний catch
+    }
   }
-};
+} catch (err: any) {
+  setSaveStatus("error");
+  setErrorMessage(err.message);
+}
+}
 
 
  return (

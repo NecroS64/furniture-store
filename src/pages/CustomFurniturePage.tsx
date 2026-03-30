@@ -4,6 +4,16 @@ import FurnitureCard from "../components/FurnitureCard";
 import {Navbar} from "./CatalogPage"
 import { Furniture, Shelves, Seats } from "../types/furniture";
 
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const cookieValue = parts.pop()?.split(';').shift();
+    return cookieValue ?? null;
+  }
+  return null;
+}
+
 const CustomFurniturePage = () => {
   const [furniture, setFurniture] = useState<Furniture[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,20 +28,57 @@ const CustomFurniturePage = () => {
       // });
 
   useEffect(() => {
-    let token = localStorage.getItem("accessToken");
-    axios.get("http://localhost:3001/api/furniture/custom",{
+  const fetchCustomFurniture = async () => {
+    try {
+      let token = getCookie("accessToken");
+      if (!token) {
+        // Если токена нет, пытаемся обновить через refresh
+        throw new Error("unauthorized");
+      }
+
+      const response = await axios.get("http://localhost:3001/api/furniture/custom", {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
-      })
-      .then(res => {
-        setFurniture(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
+      });
+
+      setFurniture(response.data);
+      setLoading(false);
+    } catch (error: any) {
+      // Если ошибка авторизации (401) или отсутствие токена
+      if (error.response?.status === 401 || error.message === "unauthorized") {
+        try {
+          // Обновляем токен
+          const refreshResp = await axios.post(
+            "http://localhost:3001/api/auth/refresh",
+            {},
+            { withCredentials: true }
+          );
+
+          const newToken = refreshResp.data.accessToken;
+          // Сохраняем новый токен в куку
+          document.cookie = `accessToken=${newToken}; path=/; Secure; SameSite=Strict`;
+
+          // Повторяем исходный запрос с новым токеном
+          const retryResponse = await axios.get("http://localhost:3001/api/furniture/custom", {
+            headers: { Authorization: `Bearer ${newToken}` },
+            withCredentials: true,
+          });
+
+          setFurniture(retryResponse.data);
+          setLoading(false);
+        } catch (refreshError) {
+          setError("Не удалось загрузить пользовательскую мебель. Пожалуйста, войдите снова.");
+          setLoading(false);
+        }
+      } else {
         setError("Не удалось загрузить пользовательскую мебель");
         setLoading(false);
-      });
-  }, []);
+      }
+    }
+  };
+
+  fetchCustomFurniture();
+}, []);
 
   if (loading) return <div className="container mt-4">Загрузка...</div>;
   if (error) return <div className="container mt-4">{error}</div>;

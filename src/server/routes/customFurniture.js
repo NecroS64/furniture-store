@@ -179,7 +179,7 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 
     await conn.commit();
-    res.json({ message: "Model saved successfully", id: furnitureId });
+    res.status(200).json({ message: "Model saved successfully", id: furnitureId });
   } catch (err) {
     await conn.rollback();
     console.error(err);
